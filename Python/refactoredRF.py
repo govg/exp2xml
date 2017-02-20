@@ -8,7 +8,7 @@
 import numpy as np
 from collections import deque
 
-LAMBDA = 0
+LAMBDA = 2
 
 class Node:
 	def __init__(self, sc, classwts, classes, maxdepth, totaldata=500):
