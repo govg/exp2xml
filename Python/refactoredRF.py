@@ -8,9 +8,10 @@
 import numpy as np
 from collections import deque
 
+LAMBDA = 0
 
 class Node:
-	def __init__(self, sc, classwts, classes, maxdepth):
+	def __init__(self, sc, classwts, classes, maxdepth, totaldata=500):
 		self.leafNode = False
 		self.x=-1;
 		self.leftidx = -1
@@ -23,6 +24,7 @@ class Node:
 		self.classwts = classwts
 		self.classes = classes
 		self.maxdepth = maxdepth
+                self.totaldata = totaldata
 		if (sc == 'infogain'):
 			self.splitCriterion = informationGain
 		if (sc == 'gini'):
@@ -76,7 +78,9 @@ class Node:
 
 				t = np.random.random()*(np.float(tmax)-tmin)+tmin
 				dec = (tempX<t)
+
 				InfoGain = self.splitCriterion(Y,dec,u)
+                                factor = Y.shape[0] / totaldata
 
 				if (InfoGain<highestInfoGain):
 					highestInfoGain = InfoGain
@@ -161,12 +165,14 @@ class tree:
 			classwts = classweights(Y)
 		dataix = np.arange(N)
 		queue = deque()
-		tempnode = Node(self.splitCriterion, classwts, u, self.depth)
+
+		tempnode = Node(self.splitCriterion, classwts, u, self.depth, Y.shape[0])
 		tempnode.leftidx = 0
 		tempnode.rightidx = dataix.size-1
 		tempnode.level = 0
 		self.Nodes.append(tempnode)
 		queue.append(0)
+
 		while(queue):
 			currentnode = queue.popleft()
 			leftidx = self.Nodes[currentnode].leftidx
@@ -316,6 +322,9 @@ def tprloss(y,d,u):
         yl = y[d]
         yr = y[~d]
 
+        if (yl.shape[0] == 0) or (yr.shape[0] == 0):
+            return 2
+
         if(yl.mean() > 0.5):
             llabel = 1
         else:
@@ -336,7 +345,13 @@ def tprloss(y,d,u):
         else:
             HR = yr.mean()
 
-        return HR + HL
+        avgsize = (yl.shape[0] + yr.shape[0])*0.5
+
+        variance = (yl.shape[0] - avgsize)**2
+
+        normvariance = variance**0.5 * LAMBDA * (1/(y.shape[0]))
+
+        return HR + HL + normvariance
 
 def informationGain(y,d,u):
 	"""Function to calculate the information gain
