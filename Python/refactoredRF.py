@@ -80,7 +80,6 @@ class Node:
 				dec = (tempX<t)
 
 				InfoGain = self.splitCriterion(Y,dec,u)
-                                factor = Y.shape[0] / totaldata
 
 				if (InfoGain<highestInfoGain):
 					highestInfoGain = InfoGain
