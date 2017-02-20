@@ -27,6 +27,8 @@ class Node:
 			self.splitCriterion = informationGain
 		if (sc == 'gini'):
 			self.splitCriterion = giniGain
+                if (sc == 'exp'):
+                        self.splitCriterion = tprloss
 
 	
 	def fit(self,X,Y):
@@ -45,7 +47,7 @@ class Node:
 		
 		u = self.classes
 		D = X.shape[1]
-		highestInfoGain =-100  # initialization
+		highestInfoGain =100  # initialization
 		# node = Node()
 		candidates = {'var':0,'thresh':0}
 		# for each variable, how many random threshold checks have to be made. 
@@ -53,7 +55,9 @@ class Node:
 		# number of variables to be evaluated at each node. set to sqrt(totalDim of features)
 		numVars = np.round(np.sqrt(D)).astype(np.int16) 
 		isLeafNode = self.trivialNodeCheck(Y) or self.level>=self.maxdepth
+
 		if isLeafNode:
+
 			self.leafNode = True
 			hc = np.histogram(Y,np.append(u,np.Inf))[0]
 			hc = (hc.astype(np.float)+1.0)/self.classwts
@@ -62,15 +66,19 @@ class Node:
 			return
 			
 		for _ in xrange(numVars):
+
 			var = np.random.random_integers(D)-1  ### -1 because it generates between 1 and D and we need between 0 and D-1
 			tempX = X[:,var]
 			tmin = np.min(tempX)
 			tmax = np.max(tempX)
+
 			for _ in xrange(numChecks):
+
 				t = np.random.random()*(np.float(tmax)-tmin)+tmin
 				dec = (tempX<t)
 				InfoGain = self.splitCriterion(Y,dec,u)
-				if (InfoGain>highestInfoGain):
+
+				if (InfoGain<highestInfoGain):
 					highestInfoGain = InfoGain
 					candidates['var'] = var
 					candidates['thresh'] = t
@@ -296,6 +304,39 @@ class RandomForest:
 ############################################################################
 ############################################################################
 
+
+def tprloss(y,d,u):
+        """ Function to calculate TPR loss (which is totally made)
+	:param y: labels of data at the current node
+	:param d: binary array of the length(y) specifying data split
+	:param u: the list of classes to look for. 
+	:returns: the information gain given by the current split criterion.
+        """
+
+        yl = y[d]
+        yr = y[~d]
+
+        if(yl.mean() > 0.5):
+            llabel = 1
+        else:
+            llabel = 0
+
+        if(yr.mean() > 0.5):
+            rlabel = 1
+        else:
+            rlabel = 0
+
+        if (llabel):
+            HL = 1 - yl.mean()
+        else:
+            HL = yl.mean()
+
+        if (rlabel):
+            HR = 1 - yr.mean()
+        else:
+            HR = yr.mean()
+
+        return HR + HL
 
 def informationGain(y,d,u):
 	"""Function to calculate the information gain
