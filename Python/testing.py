@@ -1,5 +1,6 @@
-import refactoredRF as rflib
+#import refactoredRF as rflib
 import numpy as np
+import paralleltrees as rflib
 
 X_train = np.load("../Data/Xtrain.npy")
 X_test = np.load("../Data/Xtest.npy")
@@ -13,7 +14,7 @@ for i in xrange(100):
     clf.fit(X_train, Y_train)
     data[i] = (Y_test == clf.predict(X_test)).mean()
 
-np.save("data",data)
+np.save("data2",data)
 
     
 
