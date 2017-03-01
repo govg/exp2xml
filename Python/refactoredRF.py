@@ -8,7 +8,7 @@
 import numpy as np
 from collections import deque
 
-LAMBDA = 0
+LAMBDA = 2
 
 class Node:
         def __init__(self, sc, classwts, classes, maxdepth, totaldata=500):
@@ -32,7 +32,7 @@ class Node:
                         self.splitCriterion = giniGain
                 if (sc == 'exp'):
                         self.splitCriterion = tprloss
-
+                    
 
         def fit(self,X,Y):
                 """" Function for training the node given the relevant data. 
@@ -130,8 +130,7 @@ class Node:
                 """
                 yhat = (X[:,self.x] < self.t)
                 return yhat    
-
-
+		
 
 
 ############################################################################
