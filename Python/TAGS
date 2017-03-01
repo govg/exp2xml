@@ -1,0 +1,21 @@
+
+refactoredRF.py,466
+class Node:Node13,240
+	def __init__(14,253
+	def fit(36,861
+	def trivialNodeCheck(97,2698
+	def predict(120,3395
+class tree:tree141,4283
+	def __init__(142,4296
+	def fit(150,4488
+	def predict(212,6715
+class RandomForest:RandomForest253,8488
+	def __init__(258,8776
+	def fit(273,9507
+	def predict(284,9755
+def tprloss(314,10790
+def informationGain(356,11840
+def entropy(372,12301
+def giniGain(386,12724
+def gini(402,13189
+def classweights(416,13529
