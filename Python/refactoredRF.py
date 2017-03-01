@@ -83,10 +83,10 @@ class Node:
                                 # InfoGain = self.splitCriterion(Y,dec,u)
                                 # factor = Y.shape[0] / self.totaldata
 
-                                rankingLoss = ranking_loss(Y, dec, var, X)
+                                rankingLoss = swap_loss(Y, dec, var, X)
                                 InfoGain = rankingLoss
                                 
-                                if (InfoGain<highestInfoGain):
+                                if (InfoGain < highestInfoGain):
                                         highestInfoGain = InfoGain
                                         candidates['var'] = var
                                         candidates['thresh'] = t
@@ -312,6 +312,66 @@ class RandomForest:
 ############################################################################
 ############################################################################
 ############################################################################
+def swap_loss(y, d, i, x):
+        '''
+        calculates swap loss across dimension i by swapping from sets determined
+        by d.
+        param y: Sorted list along some dimension
+        param d: binary array specifying data split
+        param i: New dimension to be checked 
+        param x: Data array
+        '''
+
+        sindices = x[:, i].argsort()[::-1]
+        yl_s = sindices[d]
+        yr_s = sindices[~d]
+
+        #   Obtain minority labels
+        if yr_s.mean() < 0.5:
+            rclass = 1
+        else:
+            rclass = 0
+
+        if yl_s.mean() < 0.5:
+            lclass = 1
+        else:
+            lclass = 0
+
+        origloss = ranking_loss(y, d, i, x)
+        f = 0.25 * (yr_s == rclass).shape[0]
+
+        for _ in range(int(f)):
+            yr_s = sindices[~d]
+            yl_s = sindices[d]
+
+            print(np.where(yr_s == rclass))
+            swapidx = np.where(yr_s == rclass)[0][0]
+            d[swapidx] = 1
+
+            if lclass == ~rclass:
+                swapidx = np.where(yl_s == lclass)[0][0]
+                d[swapidx] = 0
+
+            curloss = ranking_loss(y, d, i, x)
+
+            if(curloss < origloss):
+                origloss = curloss
+            else:
+                break
+
+        numdims = int(x.shape[1]**(0.5))
+
+        for _ in range(numdims):
+            j = np.random.random_integers(x.shape[1]) - 1
+            xs = x[:, i]
+
+            ds = xs > xs.mean()
+            curloss = ranking_loss(y, ds, j, x)
+
+            if(curloss < origloss):
+                origloss = curloss
+
+        return origloss
 
 
 def ranking_loss(y, d, i, x):
