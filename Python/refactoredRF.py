@@ -338,27 +338,37 @@ def ranking_loss(y, d, i, x):
         yr_s = yr[r_indices]
 
         l_cost_a, l_cost_d, r_cost_a, r_cost_d = 0.0, 0.0, 0.0, 0.0
+        l_c_neg_a, l_c_neg_d, r_c_neg_a, r_c_neg_d = 0.0, 0.0, 0.0, 0.0
         
         for i in range(len(l_indices)):
                 if yl_s[i] == 0:
                         l_cost_a += 1 / float((2+i))
+                else:
+                        l_c_neg_a += 1 / float((2+i))
 
         for i in range(len(l_indices)-1, -1, -1):
                 if yl_s[i] == 0:
                         l_cost_d += 1 / float((2+len(l_indices)-1-i))
-        
+                else:
+                        l_c_neg_d += 1 / float((2+len(l_indices)-1-i))
+                        
                         
         for i in range(len(r_indices)):
                 if yr_s[i] == 0:
                         r_cost_a += 1 / float((2+i))
 
+                else:
+                        r_c_neg_a += 1 / float((2+i))
+
         for i in range(len(r_indices)-1, -1, -1):
                 if yr_s[i] == 0:
                         r_cost_d += 1 / float((2+len(r_indices)-1-i))
+                else:
+                        r_c_neg_d += 1 / float((2+len(r_indices)-1-i))
         
         # print(l_cost_a, l_cost_d, r_cost_a, r_cost_d)
-        l_cost = min(l_cost_a, l_cost_d)
-        r_cost = min(r_cost_a, r_cost_d)
+        l_cost = min(l_cost_a, l_cost_d, l_c_neg_d, l_c_neg_a)
+        r_cost = min(r_cost_a, r_cost_d, r_c_neg_a, r_c_neg_d)
         # print(l_cost + r_cost)
         return l_cost + r_cost
 
