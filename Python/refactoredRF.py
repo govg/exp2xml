@@ -314,6 +314,69 @@ class RandomForest:
 ############################################################################
 ############################################################################
 
+def rel_ranking_loss(y, d, i, x):
+        '''
+        function to calculate the relative ranking loss of the split according to a given dimension
+        param y: labels of data at current node
+        param d: binary array of the length(y) specifying data split
+        param i: the dimension along which the split has been made
+        param x: the data points for which the split has been made
+        returns: the ranking loss given by the current split criterion.
+        '''
+        xl = x[d]
+        xr = x[~d]
+        yl = y[d]
+        yr = y[~d]
+
+        l_indices = xl[:,i].argsort()[::-1]
+        print(l_indices)
+        r_indices = xr[:,i].argsort()[::-1]
+        print(r_indices)
+        xl_s = xl[l_indices]
+        xr_s = xr[r_indices]
+
+        yl_s = yl[l_indices]
+        yr_s = yr[r_indices]
+
+        losslp, lossln, lossrp, lossrn = 0, 0, 0, 0
+
+        plcounts, nlcounts, prcounts, nrcounts = 0, 0, 0, 0
+
+        print yl_s, yr_s
+        for j in range(len(yl_s)):
+                if yl_s[j] == 1:
+                        plcounts += 1
+                        losslp += nlcounts
+                else:
+                        nlcounts += 1
+                        lossln += plcounts
+
+        for j in range(len(yr_s)):
+                if yr_s[j] == 1:
+                        prcounts += 1
+                        lossrp += nrcounts
+                else:
+                        nrcounts += 1
+                        lossrn += prcounts
+
+        print(losslp, lossln, lossrp, lossrn)        
+        if losslp < lossln:
+                left_pref = 1
+                lossl = losslp
+        else:
+                left_pref = 0
+                lossl = lossln
+
+        if lossrp < lossrn:
+                right_pref = 1
+                lossr = lossrp
+        else:
+                right_pref = 0
+                lossr = lossrn
+        
+        return [(lossl + lossr), left_pref, right_pref, plcounts, nlcounts, prcounts, nrcounts] 
+        
+
 
 def ranking_loss(y, d, i, x):
         '''
