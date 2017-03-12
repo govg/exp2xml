@@ -1,5 +1,5 @@
 import numpy as np
-from refactoredRF import ranking_loss
+from refactoredRF import ranking_loss, rel_ranking_loss
 
 perm = np.random.permutation(24)
 X = perm.reshape((8, 3))
@@ -16,5 +16,6 @@ dec = (x_index < threshold)
 
 # print(dec)
 
-ranking_loss(Y, dec, index, X)
-
+# ranking_loss(Y, dec, index, X)
+ret = rel_ranking_loss(Y, dec, index, X)
+print(ret)
