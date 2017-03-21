@@ -92,7 +92,7 @@ class Node:
                                 bestObj, rl, rr, prcount, nrcount, plcount, nlcount = rel_ranking_loss(Y, delta, var, X)
 
                                 # Compute best possible loss using permutation of delta
-                                tempdelta = optimizeDelta(Y, delta, rl, rr, var, X)
+                                tempdelta = optimizeDelta(X, Y, var, delta, rl, rr, prcount, nrcount, plcount, nlcount) 
                                
                                 # Compute optimal sparse vector to get required split
                                 tempvar, tempT = optimizeW(X, tempdelta)
