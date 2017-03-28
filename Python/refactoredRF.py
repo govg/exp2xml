@@ -89,6 +89,8 @@ class Node:
                         # Compute initial objective
 
                         bestObj, rl, rr, prcount, nrcount, plcount, nlcount = rel_ranking_loss(Y, delta, var, X)
+
+                        numIters = 5
                         
                         for _ in xrange(numIters):
 
@@ -359,8 +361,8 @@ def optimizeDelta(x, y, var, d, rl, rr, prc, nrc, plc, nlc) :
         yl = y[d]
         yr = y[~d]
 
-        l_indices = xl[:,i].argsort()[::-1]
-        r_indices = xr[:,i].argsort()[::-1]
+        l_indices = xl[:,var].argsort()[::-1]
+        r_indices = xr[:,var].argsort()[::-1]
         xl_s = xl[l_indices]
         xr_s = xr[r_indices]
 
@@ -403,7 +405,7 @@ def optimizeDelta(x, y, var, d, rl, rr, prc, nrc, plc, nlc) :
         min -> min : L = L - (tmajl - cmaj) + tmajr
 
         '''
-        for j in range(len(yl_s)):
+        for j in range(len(yl_s)):     #should be reversed order, right?
                 if yl_s[j] == rl:
                     if yl_s[j] == rr:
                         delta[j] = 0 
@@ -427,16 +429,16 @@ def optimizeDelta(x, y, var, d, rl, rr, prc, nrc, plc, nlc) :
         min -> min : L = L - (tmajr - cmaj)         -   Always move 
         '''
         cmaj, cmin = 0, 0
-        for j in range(len(yl_s)):
-                if yl_s[j] == rr:
-                    if yl_s[j] == rl:
+        for j in range(len(yr_s)):
+                if yr_s[j] == rr:
+                    if yr_s[j] == rl:
                         if tminl < cmin:
                             delta[j] = 1 
                     else:
                         delta[j] = 1
                     cmaj = cmaj + 1
                 else:
-                    if yl_s[j] == rr:
+                    if yr_s[j] == rl:
                         if cmaj + tminl - tmajr < 0:
                                 delta[j] = 1
                     else:
@@ -451,8 +453,12 @@ def optimizeW(X, Y):
         Generates random features and thresholds and finds best performing so far
 
         param X: Data to be classified
-        param Y: Ground truth labels
+        param Y: Ground truth labels, as supplied (required split)
         '''
+        numVars = 5
+        numChecks = 8
+        D = X.shape[1]
+        
         for _ in xrange(numVars):
 
             var = np.random.random_integers(D)-1  ### -1 because it generates between 1 and D and we need between 0 and D-1
@@ -512,7 +518,7 @@ def swap_loss(y, d, i, x):
             yr_s = sindices[~d]
             yl_s = sindices[d]
 
-            print(np.where(yr_s == rclass))
+            # print(np.where(yr_s == rclass))
             swapidx = np.where(yr_s == rclass)[0][0]
             d[swapidx] = 1
 
@@ -561,9 +567,9 @@ def rel_ranking_loss(y, d, i, x):
         yr = y[~d]
 
         l_indices = xl[:,i].argsort()[::-1]
-        print(l_indices)
+        # print(l_indices)
         r_indices = xr[:,i].argsort()[::-1]
-        print(r_indices)
+        # print(r_indices)
         xl_s = xl[l_indices]
         xr_s = xr[r_indices]
 
@@ -574,7 +580,7 @@ def rel_ranking_loss(y, d, i, x):
 
         plcounts, nlcounts, prcounts, nrcounts = 0, 0, 0, 0
 
-        print yl_s, yr_s
+        # print yl_s, yr_s
         for j in range(len(yl_s)):
                 if yl_s[j] == 1:
                         plcounts += 1
@@ -591,7 +597,7 @@ def rel_ranking_loss(y, d, i, x):
                         nrcounts += 1
                         lossrn += prcounts
 
-        print(losslp, lossln, lossrp, lossrn)        
+        # print(losslp, lossln, lossrp, lossrn)        
         if losslp < lossln:
                 left_pref = 1
                 lossl = losslp
