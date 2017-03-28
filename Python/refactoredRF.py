@@ -75,22 +75,44 @@ class Node:
                         tmin = np.min(tempX)
                         tmax = np.max(tempX)
 
-                        for _ in xrange(numChecks):
+                        # Generate random feature/threshold pair and partition
+                        t = np.random.random()*(np.float(tmax)-tmin)+tmin
+                        # Working with conventions in FastXML paper
+                        # delta - partition flag
+                        # rl,rr - rank preferences
+                        # w - 1 sparse vector
+                        candidates['var'] = var
+                        candidates['thresh'] = t
 
-                                t = np.random.random()*(np.float(tmax)-tmin)+tmin
-                                dec = (tempX<t)
+                        delta = (tempX<t)
 
-                                # InfoGain = self.splitCriterion(Y,dec,u)
-                                # factor = Y.shape[0] / self.totaldata
+                        # Compute initial objective
 
-                                rankingLoss = ranking_loss(Y, dec, var, X)
-                                InfoGain = rankingLoss
-                                
-                                if (InfoGain<highestInfoGain):
-                                        highestInfoGain = InfoGain
-                                        candidates['var'] = var
-                                        candidates['thresh'] = t
+                        bestObj, rl, rr, prcount, nrcount, plcount, nlcount = rel_ranking_loss(Y, delta, var, X)
+                        
+                        for _ in xrange(numIters):
 
+          
+                                # Compute best possible loss using permutation of delta
+                                tempdelta = optimizeDelta(X, Y, var, delta, rl, rr, prcount, nrcount, plcount, nlcount) 
+                               
+                                # Compute optimal sparse vector to get required split
+                                tempvar, tempT = optimizeW(X, tempdelta)
+                                tempdel = (X[:,tempvar] < tempT)
+
+                                # Compute objective for new sparse vector
+                                curObj, rl, rr, prcount, nrcount, plcount, nlcount = rel_ranking_loss(Y, tempdel, tempvar, X)
+
+                                # Update only when objective was decreased, else
+                                # break out of loop with current settings
+                                if (curObj < bestObj):
+                                        bestObj = curObj
+                                        candidates['var'] = tempvar
+                                        candidates['thresh'] = tempT
+                                        delta = tempdel
+                                        var = tempvar
+                                else:
+                                        break
 
                 self.x = candidates['var']
                 self.t = candidates['thresh']
@@ -183,12 +205,14 @@ class tree:
                         currentlevel = self.Nodes[currentnode].level
                         reld = dataix[leftidx:rightidx]  
                         self.Nodes[currentnode].fit(X[reld],Y[reld])
+
                         if self.Nodes[currentnode].leafNode == False:
                                 yhat = self.Nodes[currentnode].predict(X[reld])
                                 yhat = yhat.reshape((yhat.size,))
                                 i1 = yhat.nonzero()[0]
                                 i2 = (yhat==0).nonzero()[0]
                                 dataix[self.Nodes[currentnode].leftidx:self.Nodes[currentnode].rightidx] = np.concatenate((reld[i1],reld[i2])) 
+
                                 #append left child
                                 nodeleft = Node(self.splitCriterion, classwts, u, self.depth)
                                 nodeleft.leftidx = self.Nodes[currentnode].leftidx
@@ -197,6 +221,7 @@ class tree:
                                 self.Nodes.append(nodeleft)
                                 self.Nodes[currentnode].leftchild = len(self.Nodes)-1
                                 queue.append(len(self.Nodes)-1) 
+
                                 #append right child
                                 noderight = Node(self.splitCriterion, classwts, u, self.depth)
                                 noderight.leftidx = self.Nodes[currentnode].rightidx-i2.shape[0]
@@ -312,6 +337,209 @@ class RandomForest:
 ############################################################################
 ############################################################################
 ############################################################################
+#   Remove usage of X everywhere and replace with tempX, will reduce memory
+#   drastically
+def optimizeDelta(x, y, var, d, rl, rr, prc, nrc, plc, nlc) :
+        '''
+        Function computes optimal partitioning (delta) that has minimum
+        ranking loss along variable 'var' in data X
+
+        x: Data 
+        y: Ground truth labels
+        var: Variable along which ranking loss has been calculated
+        d: Original partition
+        rl(rr): If positive class is used in left(right) partitions
+        prc, nrc, plc, nlc: postive right counts and so on
+        '''
+        
+        
+        #   First obtain the sorted lists
+        xl = x[d]
+        xr = x[~d]
+        yl = y[d]
+        yr = y[~d]
+
+        l_indices = xl[:,i].argsort()[::-1]
+        r_indices = xr[:,i].argsort()[::-1]
+        xl_s = xl[l_indices]
+        xr_s = xr[r_indices]
+
+        yl_s = yl[l_indices]
+        yr_s = yr[r_indices]
+
+        #   Check for swaps
+        #   Left - higher partition
+        #   Right - lower partition 
+     
+        delta = d
+        if rl == 1:
+            tmajl = plc
+            tminl = nlc
+        else:
+            tmajl = nlc
+            tminl = plc
+
+        if rr == 1:
+            tmajr = prc
+            tminr = nrc
+        else:
+            tmajr = nrc
+            tminr = prc
+
+        # Counts cumulative number till current datapoint
+        cmaj, cmin = 0, 0
+
+        '''
+        denote minl(minr) as minority label in left(right)
+        denote similarly majl(majr)
+        denote cmin as cumulative sum of minority labels till current
+        denote cmaj as cumulative sum of majority labels till current
+        denote tminl(r/maj) as total minority elements in left(r/maj)
+        Four cases will now arise when moving from l -> r
+
+        maj -> maj : L = L - cmin                   -   Always move
+        maj -> min : L = L - cmin + tmajr
+        min -> maj : L = L - (tmajl - cmaj)         -   Always move
+        min -> min : L = L - (tmajl - cmaj) + tmajr
+
+        '''
+        for j in range(len(yl_s)):
+                if yl_s[j] == rl:
+                    if yl_s[j] == rr:
+                        delta[j] = 0 
+                    else:
+                        if(cmin > tmajr):
+                            delta[j] = 0
+                    cmaj = cmaj + 1
+                else:
+                    if yl_s[j] == rr:
+                        delta[j] = 0
+                    else:
+                        if cmaj + tmajr - tmajl < 0:
+                            delta[j] = 0
+                    cmin = cmin + 1
+        ''' 
+        Four cases will now arise when moving from r -> l
+
+        maj -> maj : L = L - cmin + tminl
+        maj -> min : L = L - cmin                   -   Always move
+        min -> maj : L = L - (tmajr - cmaj) + tminl
+        min -> min : L = L - (tmajr - cmaj)         -   Always move 
+        '''
+        cmaj, cmin = 0, 0
+        for j in range(len(yl_s)):
+                if yl_s[j] == rr:
+                    if yl_s[j] == rl:
+                        if tminl < cmin:
+                            delta[j] = 1 
+                    else:
+                        delta[j] = 1
+                    cmaj = cmaj + 1
+                else:
+                    if yl_s[j] == rr:
+                        if cmaj + tminl - tmajr < 0:
+                                delta[j] = 1
+                    else:
+                        delta[j] = 1
+                    cmin = cmin + 1
+
+        return delta
+def optimizeW(X, Y):
+        '''
+        Function computes optimal 1-sparse vector that can obtain required split
+        This is a substitute for the logistic regression step in FastXML
+        Generates random features and thresholds and finds best performing so far
+
+        param X: Data to be classified
+        param Y: Ground truth labels
+        '''
+        for _ in xrange(numVars):
+
+            var = np.random.random_integers(D)-1  ### -1 because it generates between 1 and D and we need between 0 and D-1
+            tempX = X[:,var]
+            tmin = np.min(tempX)
+            tmax = np.max(tempX)
+            
+            minloss = Y.sum()
+            topt = 0
+            wopt = 0
+
+            for _ in xrange(numChecks):
+
+                t = np.random.random()*(np.float(tmax)-tmin)+tmin
+                ydash = (tempX<t)
+
+                # InfoGain = self.splitCriterion(Y,dec,u)
+                # factor = Y.shape[0] / self.totaldata
+
+                loss = (ydash == Y).sum()
+                if( loss < minloss):
+                    minloss = loss
+                    topt = t
+                    wopt = var
+
+        return wopt, topt
+        
+def swap_loss(y, d, i, x):
+        '''
+        calculates swap loss across dimension i by swapping from sets determined
+        by d.
+        param y: Sorted list along some dimension
+        param d: binary array specifying data split
+        param i: New dimension to be checked 
+        param x: Data array
+        '''
+
+        sindices = x[:, i].argsort()[::-1]
+        yl_s = sindices[d]
+        yr_s = sindices[~d]
+
+        #   Obtain minority labels
+        if yr_s.mean() < 0.5:
+            rclass = 1
+        else:
+            rclass = 0
+
+        if yl_s.mean() < 0.5:
+            lclass = 1
+        else:
+            lclass = 0
+
+        origloss = ranking_loss(y, d, i, x)
+        f = 0.25 * (yr_s == rclass).shape[0]
+
+        for _ in range(int(f)):
+            yr_s = sindices[~d]
+            yl_s = sindices[d]
+
+            print(np.where(yr_s == rclass))
+            swapidx = np.where(yr_s == rclass)[0][0]
+            d[swapidx] = 1
+
+            if lclass == ~rclass:
+                swapidx = np.where(yl_s == lclass)[0][0]
+                d[swapidx] = 0
+
+            curloss = ranking_loss(y, d, i, x)
+
+            if(curloss < origloss):
+                origloss = curloss
+            else:
+                break
+
+        numdims = int(x.shape[1]**(0.5))
+
+        for _ in range(numdims):
+            j = np.random.random_integers(x.shape[1]) - 1
+            xs = x[:, i]
+
+            ds = xs > xs.mean()
+            curloss = ranking_loss(y, ds, j, x)
+
+            if(curloss < origloss):
+                origloss = curloss
+
+        return origloss
 
 def change_rel_rl(pref1, pref2, p1counts, n1counts, p2counts, n2counts, label):
         if pref1 == label:
@@ -320,6 +548,7 @@ def change_rel_rl(pref1, pref2, p1counts, n1counts, p2counts, n2counts, label):
 def rel_ranking_loss(y, d, i, x):
         '''
         function to calculate the relative ranking loss of the split according to a given dimension
+
         param y: labels of data at current node
         param d: binary array of the length(y) specifying data split
         param i: the dimension along which the split has been made
@@ -377,7 +606,7 @@ def rel_ranking_loss(y, d, i, x):
                 right_pref = 0
                 lossr = lossrn
         
-        return [(lossl + lossr), left_pref, right_pref, plcounts, nlcounts, prcounts, nrcounts] 
+        return (lossl + lossr), left_pref, right_pref, plcounts, nlcounts, prcounts, nrcounts
         
 
 
