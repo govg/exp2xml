@@ -403,7 +403,7 @@ def optimizeDelta(x, y, var, d, rl, rr, prc, nrc, plc, nlc) :
         min -> min : L = L - (tmajl - cmaj) + tmajr
 
         '''
-        for j in range(len(yl_s)):
+        for j in range(len(yl_s)):     #should be reversed order, right?
                 if yl_s[j] == rl:
                     if yl_s[j] == rr:
                         delta[j] = 0 
@@ -427,16 +427,16 @@ def optimizeDelta(x, y, var, d, rl, rr, prc, nrc, plc, nlc) :
         min -> min : L = L - (tmajr - cmaj)         -   Always move 
         '''
         cmaj, cmin = 0, 0
-        for j in range(len(yl_s)):
-                if yl_s[j] == rr:
-                    if yl_s[j] == rl:
+        for j in range(len(yr_s)):
+                if yr_s[j] == rr:
+                    if yr_s[j] == rl:
                         if tminl < cmin:
                             delta[j] = 1 
                     else:
                         delta[j] = 1
                     cmaj = cmaj + 1
                 else:
-                    if yl_s[j] == rr:
+                    if yr_s[j] == rl:
                         if cmaj + tminl - tmajr < 0:
                                 delta[j] = 1
                     else:
