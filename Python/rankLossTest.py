@@ -18,4 +18,5 @@ dec = (x_index < threshold)
 
 # ranking_loss(Y, dec, index, X)
 ret = rel_ranking_loss(Y, dec, index, X)
+
 print(ret)
