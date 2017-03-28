@@ -86,11 +86,13 @@ class Node:
 
                         delta = (tempX<t)
 
+                        # Compute initial objective
+
+                        bestObj, rl, rr, prcount, nrcount, plcount, nlcount = rel_ranking_loss(Y, delta, var, X)
+                        
                         for _ in xrange(numIters):
 
-                                # Compute initial objective
-                                bestObj, rl, rr, prcount, nrcount, plcount, nlcount = rel_ranking_loss(Y, delta, var, X)
-
+          
                                 # Compute best possible loss using permutation of delta
                                 tempdelta = optimizeDelta(X, Y, var, delta, rl, rr, prcount, nrcount, plcount, nlcount) 
                                
@@ -99,7 +101,7 @@ class Node:
                                 tempdel = (X[:,tempvar] < tempT)
 
                                 # Compute objective for new sparse vector
-                                curObj = rel_ranking_loss(Y, tempdel, tempvar, X)
+                                curObj, rl, rr, prcount, nrcount, plcount, nlcount = rel_ranking_loss(Y, tempdel, tempvar, X)
 
                                 # Update only when objective was decreased, else
                                 # break out of loop with current settings
@@ -107,6 +109,8 @@ class Node:
                                         bestObj = curObj
                                         candidates['var'] = tempvar
                                         candidates['thresh'] = tempT
+                                        delta = tempdel
+                                        var = tempvar
                                 else:
                                         break
 
@@ -335,16 +339,17 @@ class RandomForest:
 ############################################################################
 #   Remove usage of X everywhere and replace with tempX, will reduce memory
 #   drastically
-def optimizeDelta(X, Y, var, d, rl, rr, prc, nrc, plc, nlc) :
+def optimizeDelta(x, y, var, d, rl, rr, prc, nrc, plc, nlc) :
         '''
         Function computes optimal partitioning (delta) that has minimum
         ranking loss along variable 'var' in data X
 
-        param Y: Ground truth labels
-        delta: Original partition
-        rl(rr): If positive class is used in left(right) partitions
+        x: Data 
+        y: Ground truth labels
         var: Variable along which ranking loss has been calculated
-        X: Data 
+        d: Original partition
+        rl(rr): If positive class is used in left(right) partitions
+        prc, nrc, plc, nlc: postive right counts and so on
         '''
         
         
