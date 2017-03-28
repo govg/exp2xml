@@ -409,8 +409,8 @@ def optimizeDelta(X, Y, var, d, rl, rr, prc, nrc, plc, nlc) :
                 else:
                     if yl_s[j] == rr:
                         delta[j] = 0
-                    else
-                        if cmaj + tmajr - tmajl < 0
+                    else:
+                        if cmaj + tmajr - tmajl < 0:
                             delta[j] = 0
                     cmin = cmin + 1
         ''' 
@@ -432,9 +432,9 @@ def optimizeDelta(X, Y, var, d, rl, rr, prc, nrc, plc, nlc) :
                     cmaj = cmaj + 1
                 else:
                     if yl_s[j] == rr:
-                        if cmaj + tminl - tmajr < 0
-                        delta[j] = 1
-                    else
+                        if cmaj + tminl - tmajr < 0:
+                                delta[j] = 1
+                    else:
                         delta[j] = 1
                     cmin = cmin + 1
 
