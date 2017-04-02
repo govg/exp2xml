@@ -9,6 +9,8 @@ import numpy as np
 from collections import deque
 
 LAMBDA = 2
+choice_counts = 0
+break_counts = 0
 
 class Node:
         def __init__(self, sc, classwts, classes, maxdepth, totaldata=500):
@@ -122,6 +124,7 @@ class Node:
                                 dim_counts[lev][tempvar] += 1
                                 totCounts = np.sum(dim_counts[lev])
                                 dim_unc[lev][tempvar] = np.sqrt(3*np.log(totCounts)/(2*dim_counts[lev][tempvar]))
+                                global choice_counts, break_counts
                                 # Update only when objective was decreased, else
                                 # break out of loop with current settings
                                 if (curObj < bestObj):
@@ -130,7 +133,9 @@ class Node:
                                         candidates['thresh'] = tempT
                                         delta = tempdel
                                         var = tempvar
+                                        choice_counts += 1
                                 else:
+                                        break_counts += 1
                                         break
 
                 self.x = candidates['var']
@@ -332,6 +337,9 @@ class RandomForest:
                 
                 for i in xrange(len(self.treeModels)):
                         self.treeModels[i].fit(X,Y, dim_counts, dim_means, dim_unc)
+                global choice_counts, break_counts
+                print "choice counts = " + str(choice_counts)
+                print "break counts = " + str(break_counts)
                 return
 
         def predict(self,X):

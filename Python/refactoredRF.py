@@ -547,8 +547,6 @@ def swap_loss(y, d, i, x):
 
         return origloss
 
-def change_rel_rl(pref1, pref2, p1counts, n1counts, p2counts, n2counts, label):
-        if pref1 == label:
                 
 
 def rel_ranking_loss(y, d, i, x):
