@@ -1,12 +1,13 @@
-import os, sys, datetime, getpass
+import os, sys, datetime, getpass, time
+import numpy as np
 sys.path.append("../Python")
 
 #   Import the required RF libs. In the future, conver these
 #   to single lib, with options. Maybe inherit?
-import rf_dimucb_level.RandomForest as RF_UCB_L
-import rf_dimucb.RandomForest as RF_UCB
-import rf_ts_level.RandomForest as RF_TS
-import refactoredRF.RandomForest as RF_BASE
+from rf_dimucb_level import RandomForest as RF_UCB_L
+from rf_dimucb import RandomForest as RF_UCB
+from rf_ts_level import RandomForest as RF_TS
+from refactoredRF import RandomForest as RF_BASE
 
 #   Assume that all the folders inside the Data folder have 
 #   requisite .npy training and testing files
@@ -21,14 +22,15 @@ log.write("\nStarted by: " + getpass.getuser())
 
 #   It is this ugly so that parameters can be assigned in a "neat" manner
 #   and classifiers added or removed without interfering with others
-clfs.append(RF_UCB_L())
-clfs.append(RF_UCB())
-clfs.append(RF_TS())
-clfs.append(RF_BASE())
+clfs.append(RF_UCB_L(numTrees=10, maxDepth=8))
+clfs.append(RF_UCB(numTrees=10, maxDepth=8))
+clfs.append(RF_TS(numTrees=10, maxDepth=8))
+clfs.append(RF_BASE(numTrees=10, maxDepth=8))
 
 #   Loop over all the datasets, and then over all the classifiers
 for curdataset in datasets:
 
+    #   Load all data
     curpath = "../Data/" + curdataset + "/"
 
     Xtr = np.load(curpath + "Xtrain.npy")
@@ -36,7 +38,9 @@ for curdataset in datasets:
     Xts = np.load(curpath + "Xtest.npy")
     Yts = np.load(curpath + "Ytest.npy")
 
-    #   Load all data
+    print("Current data is: ", curdataset)
+    log.write("\nDATASET" + curdataset)
+
     for clf in clfs:
         
         starttime = time.time()
@@ -52,8 +56,13 @@ for curdataset in datasets:
         print("Time taken: ", tottime)
 
         #   Write to logfile
-        log.write("\n" + clf.clfname())
-        log.write("\n" + clf.clfparams())
-        log.write("\n" + acc)
+        log.write("\nCLF:" + clf.clfname())
+        log.write("\n" + clf.clfparams()[0])
+        log.write("\n" + clf.clfparams()[1])
+        log.write("\nACC:" + str(acc))
+        log.write("\nTIME:" + str(tottime))
 
+curtime = str(datetime.datetime.now())
+log.write("\nTests ended: " + curtime)
+log.write("\n\n")
 log.close()
