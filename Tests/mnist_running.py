@@ -1,3 +1,7 @@
+'''
+This file converts the MNIST data into a binary classification 
+dataset suitable for our library.
+'''
 #   This is necessary to import our modules
 import sys
 sys.path.append("../Python/")
@@ -5,6 +9,10 @@ sys.path.append("../Python/")
 import numpy as np
 from rf_dimucb import RandomForest
 import mnist_input as test
+
+#   Set positive and negative class labels here
+posclass = 4
+negclass = 7
 
 train_data, train_labels, test_data, test_labels, validation_data, validation_labels = test.get_data()
 
@@ -17,18 +25,18 @@ Ytr = []
 Xte = []
 Yte = []
 for i, data in enumerate(train_data):
-    if train_labels[i][4] == 1:
+    if train_labels[i][posclass] == 1:
         Xtr.append(data)
         Ytr.append(0)
-    elif train_labels[i][7] == 1:
+    elif train_labels[i][negclass] == 1:
         Xtr.append(data)
         Ytr.append(1)
 
 for i, data in enumerate(test_data):
-    if test_labels[i][4] == 1:
+    if test_labels[i][posclass] == 1:
         Xte.append(data)
         Yte.append(0)
-    elif test_labels[i][7] == 1:
+    elif test_labels[i][negclass] == 1:
         Xte.append(data)
         Yte.append(1)
 
@@ -39,9 +47,15 @@ Yte = np.array(Yte)
 
 print Xtr.shape, Ytr.shape, Xte.shape, Yte.shape
 
+np.save("../Data/mnist/Xtrain.npy", Xtr)
+np.save("../Data/mnist/Xtest.npy", Xte)
+np.save("../Data/mnist/Ytrain.npy", Ytr)
+np.save("../Data/mnist/Ytest.npy", Yte)
 
-model = RandomForest(numTrees=20, maxDepth=8, splitCriterion='exp')
-model.fit(Xtr, Ytr)
-acc = (model.predict(Xte) == Yte).mean()
 
-print(acc)
+
+#model = RandomForest(numTrees=20, maxDepth=8, splitCriterion='exp')
+#model.fit(Xtr, Ytr)
+#acc = (model.predict(Xte) == Yte).mean()
+
+#print(acc)
