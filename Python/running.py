@@ -6,6 +6,7 @@ Xtr = np.load("Xtrain.npy")
 print(Xtr.shape)
 Xte = np.load("Xtest.npy")
 Ytr = np.load("Ytrain.npy")
+print(Ytr.shape)
 Yte = np.load("Ytest.npy")
 
 model.fit(Xtr, Ytr)

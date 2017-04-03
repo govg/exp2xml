@@ -1,0 +1,5 @@
+import mnist_input as test
+
+train_data, train_labels, test_data, test_labels, validation_data, validation_labels = test.get_data()
+
+print train_data.shape, train_labels.shape
