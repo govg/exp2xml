@@ -4,7 +4,7 @@ Library for online extreme-multi-label learning
 
 
 
-Authors : Nishit Asnani, Govind Gopakumar 
+Authors : Nishit Asnani(@asnani04), Govind Gopakumar(@govg)
 
 Affiliation : Indian Institute of Technology, Kanpur
 
