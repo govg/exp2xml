@@ -1,4 +1,4 @@
-from rf_dimucb_level import RandomForest
+from rf_ts_level import RandomForest
 import numpy as np
 
 model = RandomForest(numTrees=20, maxDepth=8, splitCriterion='exp')
