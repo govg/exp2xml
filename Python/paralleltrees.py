@@ -1,9 +1,10 @@
+#   This module is still WIP
 import numpy 
 from collections import deque
 import pp
 import random
 import copy
-#import mf
+
 class Node:
 	def __init__(self):
 		self.leafNode = True

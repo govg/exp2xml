@@ -1,10 +1,3 @@
-## @package Random Forest
-#
-#This contains all the files for the Random forest package . 
-# __all__=['ontheflyTrainer','ontheflyTester']
-""" 
-# RandomForestBatch
-"""
 import numpy as np
 from collections import deque
 
