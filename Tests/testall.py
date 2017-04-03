@@ -51,17 +51,17 @@ for curdataset in datasets:
         acc = (Yts == clf.predict(Xts)).mean()
 
         #   Print to stdout
-        print("Current classifier is : ", clf.clfname())
-        print("Current params are : ", clf.clfparams())
+        print("Current classifier is: ", clf.clfname())
+        print("Current params are: ", clf.clfparams())
         print("Accuracy is: ", acc)
         print("Time taken: ", tottime)
 
         #   Write to logfile
-        log.write("\nCLF:" + clf.clfname())
+        log.write("\nCLF: " + clf.clfname())
         log.write("\n" + clf.clfparams()[0])
         log.write("\n" + clf.clfparams()[1])
-        log.write("\nACC:" + str(acc))
-        log.write("\nTIME:" + str(tottime))
+        log.write("\nACC: " + str(acc))
+        log.write("\nTIME: " + str(tottime))
 
 curtime = str(datetime.datetime.now())
 log.write("\nTests ended: " + curtime)
