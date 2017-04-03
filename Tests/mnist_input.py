@@ -10,7 +10,7 @@ from six.moves import urllib
 from six.moves import xrange
 
 SOURCE_URL = "http://yann.lecun.com/exdb/mnist/"
-WORK_DIRECTORY = "../data"
+WORK_DIRECTORY = "../Data/mnist"
 IMAGE_SIZE = 28
 NUM_CHANNELS = 1
 PIXEL_DEPTH = 255

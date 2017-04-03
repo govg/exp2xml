@@ -1,3 +1,7 @@
+#   This is necessary to import our modules
+import sys
+sys.path.append("../Python/")
+
 #import refactoredRF as rflib
 import numpy as np
 import paralleltrees as rflib
@@ -14,7 +18,6 @@ for i in xrange(100):
     clf.fit(X_train, Y_train)
     data[i] = (Y_test == clf.predict(X_test)).mean()
 
-np.save("data2",data)
 
     
 

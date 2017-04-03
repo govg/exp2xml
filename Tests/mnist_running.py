@@ -1,3 +1,7 @@
+#   This is necessary to import our modules
+import sys
+sys.path.append("../Python/")
+
 import numpy as np
 from rf_dimucb import RandomForest
 import mnist_input as test
