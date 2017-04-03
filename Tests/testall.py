@@ -19,13 +19,14 @@ curtime = str(datetime.datetime.now())
 log = open(logfile, 'a')
 log.write("\nTests started: " +  curtime)
 log.write("\nStarted by: " + getpass.getuser())
+log.write("\nDatasets: " + str(datasets))
 
 #   It is this ugly so that parameters can be assigned in a "neat" manner
 #   and classifiers added or removed without interfering with others
-clfs.append(RF_UCB_L(numTrees=10, maxDepth=8))
-clfs.append(RF_UCB(numTrees=10, maxDepth=8))
-clfs.append(RF_TS(numTrees=10, maxDepth=8))
-clfs.append(RF_BASE(numTrees=10, maxDepth=8))
+clfs.append(RF_UCB_L(numTrees=50, maxDepth=20))
+clfs.append(RF_UCB(numTrees=50, maxDepth=20))
+clfs.append(RF_TS(numTrees=50, maxDepth=20))
+clfs.append(RF_BASE(numTrees=50, maxDepth=20))
 
 #   Loop over all the datasets, and then over all the classifiers
 for curdataset in datasets:
@@ -39,7 +40,7 @@ for curdataset in datasets:
     Yts = np.load(curpath + "Ytest.npy")
 
     print("Current data is: ", curdataset)
-    log.write("\nDATASET" + curdataset)
+    log.write("\nDATASET: " + curdataset)
 
     for clf in clfs:
         
