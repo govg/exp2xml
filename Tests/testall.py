@@ -23,10 +23,10 @@ log.write("\nDatasets: " + str(datasets))
 
 #   It is this ugly so that parameters can be assigned in a "neat" manner
 #   and classifiers added or removed without interfering with others
-clfs.append(RF_UCB_L(numTrees=50, maxDepth=20))
-clfs.append(RF_UCB(numTrees=50, maxDepth=20))
-clfs.append(RF_TS(numTrees=50, maxDepth=20))
-clfs.append(RF_BASE(numTrees=50, maxDepth=20))
+clfs.append(RF_UCB_L(numTrees=20, maxDepth=10))
+clfs.append(RF_UCB(numTrees=20, maxDepth=10))
+clfs.append(RF_TS(numTrees=20, maxDepth=10))
+clfs.append(RF_BASE(numTrees=20, maxDepth=10))
 
 #   Loop over all the datasets, and then over all the classifiers
 for curdataset in datasets:
@@ -39,8 +39,8 @@ for curdataset in datasets:
     Xts = np.load(curpath + "Xtest.npy")
     Yts = np.load(curpath + "Ytest.npy")
 
-    print("Current data is: ", curdataset)
-    log.write("\nDATASET: " + curdataset)
+    print "Current data is: ", curdataset
+    log.write("\n\nDATASET: " + curdataset)
 
     for clf in clfs:
         
@@ -51,10 +51,10 @@ for curdataset in datasets:
         acc = (Yts == clf.predict(Xts)).mean()
 
         #   Print to stdout
-        print("Current classifier is: ", clf.clfname())
-        print("Current params are: ", clf.clfparams())
-        print("Accuracy is: ", acc)
-        print("Time taken: ", tottime)
+        print "Current classifier is: ", clf.clfname()
+        print "Current params are: ", clf.clfparams()
+        print "Accuracy is: ", acc
+        print "Time taken: ", tottime
 
         #   Write to logfile
         log.write("\nCLF: " + clf.clfname())
