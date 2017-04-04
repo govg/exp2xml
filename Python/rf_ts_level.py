@@ -365,7 +365,7 @@ class RandomForest:
                 return cl[winningClass]   
 
         def clfname(self):
-                return "RF TF L"
+                return "RF TS L"
 
         def clfparams(self):
                 a = "T:" + str(self.numTrees)
