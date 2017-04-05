@@ -1,7 +1,7 @@
-
 Tests started: 2017-04-04 04:20:58.413816
 Started by: govind
 Datasets: ['satimages', 'spam', 'letter', 'usps', 'mnist']
+
 DATASET: satimages
 CLF: UCB_L
 T:50
@@ -23,6 +23,7 @@ T:50
 D:20
 ACC: 0.971164936563
 TIME: 68.8861651421
+
 DATASET: spam
 CLF: UCB_L
 T:50
@@ -44,6 +45,7 @@ T:50
 D:20
 ACC: 0.908794788274
 TIME: 122.269207954
+
 DATASET: letter
 CLF: UCB_L
 T:50
@@ -65,6 +67,7 @@ T:50
 D:20
 ACC: 0.990066225166
 TIME: 16.6495380402
+
 DATASET: usps
 CLF: UCB_L
 T:50
@@ -86,6 +89,7 @@ T:50
 D:20
 ACC: 0.980830670927
 TIME: 159.128098965
+
 DATASET: mnist
 CLF: UCB_L
 T:50
@@ -225,3 +229,9 @@ ACC: 0.969154228856
 TIME: 126.087100983
 Tests ended: 2017-04-04 14:15:14.000678
 
+
+Tests started: 2017-04-04 20:30:06.208191
+Started by: govind
+Datasets: ['satimages', 'spam', 'letter', 'usps', 'mnist']
+
+DATASET: satimages
