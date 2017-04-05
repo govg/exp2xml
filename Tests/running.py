@@ -5,7 +5,7 @@ sys.path.append("../Python/")
 from rf_ts_level import RandomForest
 import numpy as np
 
-model = RandomForest(numTrees=20, maxDepth=8, splitCriterion='exp')
+model = RandomForest(numTrees=20, maxDepth=10, splitCriterion='exp')
 Xtr = np.load("../Data/spam/Xtrain.npy")
 print(Xtr.shape)
 Xte = np.load("../Data/spam/Xtest.npy")
