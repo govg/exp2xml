@@ -67,20 +67,10 @@ class Node:
                 for _ in xrange(numVars):
 
                         # var = np.random.random_integers(D)-1  ### -1 because it generates between 1 and D and we need between 0 and D-1
-                        dim_ucb = dim_means + dim_unc
+                        dim_ucb = dim_means 
 
                         if (np.sum(dim_counts) >= dim_counts.shape[0]):
-                            # var = np.argmax(dim_ucb)
-                            samples = []
-                            for dim in range(dim_counts.shape[0]):
-                                if dim_counts[dim] == 0:
-                                    sd = 1.0
-                                else:
-                                    sd = 1.0 / np.sqrt(dim_counts[dim])
-                                picked = np.random.normal(loc=dim_means[dim], scale=sd)
-                                samples.append(picked)
-                            var = np.argmax(samples)
-                            
+                            var = np.argmax(dim_ucb)
                         else:
                             var = np.sum(dim_counts)
 
@@ -356,7 +346,7 @@ class RandomForest:
                 return cl[winningClass]   
 
         def clfname(self):
-                return "RF TS NO LEVELS"
+                return "RF M"
 
         def clfparams(self):
                 a = "T:" + str(self.numTrees)

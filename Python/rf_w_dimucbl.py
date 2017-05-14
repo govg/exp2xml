@@ -2,6 +2,8 @@ import numpy as np
 from collections import deque
 
 LAMBDA = 2
+choice_counts = 0
+break_counts = 0
 
 class Node:
         def __init__(self, sc, classwts, classes, maxdepth, totaldata=500):
@@ -67,27 +69,18 @@ class Node:
                 for _ in xrange(numVars):
 
                         # var = np.random.random_integers(D)-1  ### -1 because it generates between 1 and D and we need between 0 and D-1
-                        dim_ucb = dim_means + dim_unc
+                        dim_ucb = dim_means[self.level, :] + dim_unc[self.level, :]
 
-                        if (np.sum(dim_counts) >= dim_counts.shape[0]):
-                            # var = np.argmax(dim_ucb)
-                            samples = []
-                            for dim in range(dim_counts.shape[0]):
-                                if dim_counts[dim] == 0:
-                                    sd = 1.0
-                                else:
-                                    sd = 1.0 / np.sqrt(dim_counts[dim])
-                                picked = np.random.normal(loc=dim_means[dim], scale=sd)
-                                samples.append(picked)
-                            var = np.argmax(samples)
-                            
+                        if (np.sum(dim_counts[self.level]) >= dim_counts.shape[1]):
+                            var = np.argmax(dim_ucb)
                         else:
-                            var = np.sum(dim_counts)
+                            var = np.sum(dim_counts[self.level])
 
                         tempX = X[:,var]
                         tmin = np.min(tempX)
                         tmax = np.max(tempX)
-
+                        lev = self.level
+                        
                         # Generate random feature/threshold pair and partition
                         t = np.random.random()*(np.float(tmax)-tmin)+tmin
                         # Working with conventions in FastXML paper
@@ -102,10 +95,10 @@ class Node:
                         # Compute initial objective
 
                         bestObj, rl, rr, prcount, nrcount, plcount, nlcount = rel_ranking_loss(Y, delta, var, X)
-                        dim_means[var] = (dim_means[var]*dim_counts[var] + (-1)*bestObj / X.shape[0]) / (dim_counts[var] + 1)
-                        dim_counts[var] += 1
-                        totCounts = np.sum(dim_counts)
-                        dim_unc[var] = np.sqrt(3*np.log(totCounts)/(2*dim_counts[var]))
+                        dim_means[lev][var] = (dim_means[lev][var]*dim_counts[lev][var] + (-1)*bestObj / X.shape[0]) / (dim_counts[lev][var] + 1)
+                        dim_counts[lev][var] += 1
+                        totCounts = np.sum(dim_counts[lev])
+                        dim_unc[lev][var] = np.sqrt(3*np.log(totCounts)/(2*dim_counts[lev][var]))
                         numIters = 5
                         
                         for _ in xrange(numIters):
@@ -120,10 +113,11 @@ class Node:
                                 # Compute objective for new sparse vector
                                 curObj, rl, rr, prcount, nrcount, plcount, nlcount = rel_ranking_loss(Y, tempdel, tempvar, X)
 
-                                dim_means[tempvar] = (dim_means[tempvar]*dim_counts[tempvar] + (-1)*curObj / X.shape[0]) / (dim_counts[tempvar] + 1)
-                                dim_counts[tempvar] += 1
-                                totCounts = np.sum(dim_counts)
-                                dim_unc[tempvar] = np.sqrt(3*np.log(totCounts)/(2*dim_counts[tempvar]))
+                                dim_means[lev][tempvar] = (dim_means[lev][tempvar]*dim_counts[lev][tempvar] + (-1)*curObj / X.shape[0]) / (dim_counts[lev][tempvar] + 1)
+                                dim_counts[lev][tempvar] += 1
+                                totCounts = np.sum(dim_counts[lev])
+                                dim_unc[lev][tempvar] = np.sqrt(3*np.log(totCounts)/(2*dim_counts[lev][tempvar]))
+                                global choice_counts, break_counts
                                 # Update only when objective was decreased, else
                                 # break out of loop with current settings
                                 if (curObj < bestObj):
@@ -132,7 +126,9 @@ class Node:
                                         candidates['thresh'] = tempT
                                         delta = tempdel
                                         var = tempvar
+                                        choice_counts += 1
                                 else:
+                                        break_counts += 1
                                         break
 
                 self.x = candidates['var']
@@ -328,12 +324,15 @@ class RandomForest:
                 :param Y: Labels 
                 :returns: Trained model. 
                 """
-                dim_means = np.zeros([X.shape[1]])
-                dim_counts = np.zeros([X.shape[1]], dtype=np.int32)
-                dim_unc = np.zeros([X.shape[1]])
+                dim_means = np.zeros([self.maxDepth, X.shape[1]])
+                dim_counts = np.zeros([self.maxDepth, X.shape[1]], dtype=np.int32)
+                dim_unc = np.zeros([self.maxDepth, X.shape[1]])
                 
                 for i in xrange(len(self.treeModels)):
                         self.treeModels[i].fit(X,Y, dim_counts, dim_means, dim_unc)
+                global choice_counts, break_counts
+                print "choice counts = " + str(choice_counts)
+                print "break counts = " + str(break_counts)
                 return
 
         def predict(self,X):
@@ -350,13 +349,16 @@ class RandomForest:
                 overProb = np.zeros((X.shape[0],numCl))
                 for i in xrange(self.numTrees):
                         probs = self.treeModels[i].predict(X)
-                        overProb+=probs
+                        if i < self.numTrees / 2:
+                                overProb = overProb + 0.5 * probs
+                        else:
+                                overProb+= 1.5 * probs
 
                 winningClass = np.argmax(overProb, axis=1)
                 return cl[winningClass]   
 
         def clfname(self):
-                return "RF TS NO LEVELS"
+                return "W_UCB_L"
 
         def clfparams(self):
                 a = "T:" + str(self.numTrees)

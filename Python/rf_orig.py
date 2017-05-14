@@ -286,6 +286,14 @@ class RandomForest:
 		winningClass = np.argmax(overProb, axis=1)
 		return cl[winningClass]   
 
+        def clfname(self):
+                return "RF ORIG"
+
+        def clfparams(self):
+                a = "T:" + str(self.numTrees)
+                b = "D:" + str(self.maxDepth)
+                
+                return a,b
 
 
 ############################################################################
