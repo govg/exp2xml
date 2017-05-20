@@ -1,0 +1,13 @@
+
+Tests started: 2017-05-13 10:50:30.730878
+Started by: nishit
+Datasets: ['letter', 'mnist', 'satimages', 'spam', 'usps']
+
+DATASET: letter
+CLF: UCB_L
+T:20
+D:10
+ACC: 0.983443708609
+TIME: 3.57969689369
+
+DATASET: mnist

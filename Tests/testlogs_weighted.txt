@@ -1,0 +1,128 @@
+
+Tests started: 2017-05-13 10:52:07.618618
+Started by: nishit
+Datasets: ['letter', 'mnist', 'satimages', 'spam', 'usps']
+
+DATASET: letter
+CLF: W_UCB_L
+T:20
+D:10
+ACC: 0.986754966887
+TIME: 3.72560405731
+
+DATASET: mnist
+CLF: W_UCB_L
+T:20
+D:10
+ACC: 0.977114427861
+TIME: 69.6403410435
+
+DATASET: satimages
+CLF: W_UCB_L
+T:20
+D:10
+ACC: 0.959630911188
+TIME: 3.93051409721
+
+DATASET: spam
+CLF: W_UCB_L
+T:20
+D:10
+ACC: 0.831704668838
+TIME: 8.15337491035
+
+DATASET: usps
+CLF: W_UCB_L
+T:20
+D:10
+ACC: 0.977635782748
+TIME: 18.3054888248
+Tests ended: 2017-05-13 10:53:52.040950
+
+
+Tests started: 2017-05-13 10:59:25.637751
+Started by: nishit
+Datasets: ['letter', 'mnist', 'satimages', 'spam', 'usps']
+
+DATASET: letter
+CLF: W_UCB_L
+T:50
+D:20
+ACC: 0.993377483444
+TIME: 12.6451990604
+
+DATASET: mnist
+CLF: W_UCB_L
+T:50
+D:20
+ACC: 0.975621890547
+TIME: 307.323041916
+
+DATASET: satimages
+CLF: W_UCB_L
+T:50
+D:20
+ACC: 0.961937716263
+TIME: 16.4577319622
+
+DATASET: spam
+CLF: W_UCB_L
+T:50
+D:20
+ACC: 0.905537459283
+TIME: 75.7854120731
+
+DATASET: usps
+CLF: W_UCB_L
+T:50
+D:20
+ACC: 0.977635782748
+TIME: 52.9900460243
+Tests ended: 2017-05-13 11:07:12.584724
+
+
+Tests started: 2017-05-20 19:34:20.898118
+Started by: nishit
+Datasets: ['letter', 'mnist', 'satimages', 'spam', 'usps']
+
+DATASET: letter
+Tests started: 2017-05-20 19:47:50.529156
+Started by: nishit
+Datasets: ['letter', 'mnist', 'satimages', 'spam', 'usps']
+
+DATASET: letter
+CLF: W_UCB_L
+T:50
+D:20
+ACC: 0.996688741722
+TIME: 13.2793338299
+
+DATASET: mnist
+CLF: W_UCB_L
+T:50
+D:20
+ACC: 0.985074626866
+TIME: 305.00753808
+
+DATASET: satimages
+CLF: W_UCB_L
+T:50
+D:20
+ACC: 0.968858131488
+TIME: 16.3330237865
+
+DATASET: spam
+CLF: W_UCB_L
+T:50
+D:20
+ACC: 0.901194353963
+TIME: 75.9299280643
+
+DATASET: usps
+CLF: W_UCB_L
+T:50
+D:20
+ACC: 0.980830670927
+TIME: 52.7464420795
+Tests ended: 2017-05-20 19:55:36.298232
+

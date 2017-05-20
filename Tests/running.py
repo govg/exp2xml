@@ -2,7 +2,7 @@
 import sys
 sys.path.append("../Python/")
 
-from rf_ts import RandomForest
+from rf_w_dimucbl import RandomForest
 import numpy as np
 
 model = RandomForest(numTrees=20, maxDepth=10, splitCriterion='exp')
@@ -14,6 +14,7 @@ print(Ytr.shape)
 Yte = np.load("../Data/mnist/Ytest.npy")
 
 model.fit(Xtr, Ytr)
+model.learnWeights(Xtr, Ytr)
 
 acc = (model.predict(Xte) == Yte).mean()
 
