@@ -1,5 +1,6 @@
 import numpy as np
 from collections import deque
+from sklearn import linear_model
 
 LAMBDA = 2
 choice_counts = 0
@@ -316,6 +317,8 @@ class RandomForest:
                 self.splitCriterion = splitCriterion
                 self.weighting= weighting
                 self.treeModels = [tree(maxDepth, self.splitCriterion, self.weighting) for _ in xrange(numTrees)]
+                self.treeWeights = np.zeros(numTrees*len(self.treeModels[0].classes), dtype=float)
+                self.logreg = None
 
         def fit(self,X,Y):
                 """To train with the data provided as ndarrays
@@ -335,6 +338,30 @@ class RandomForest:
                 print "break counts = " + str(break_counts)
                 return
 
+        def learnWeights(self, X, Y):
+                """To learn the weights to be assigned to each of the trees 
+                for combining as an ensemble
+                :param X: Training features
+                :param Y: Labels 
+                :returns: learned weights. 
+                """
+                cl = self.treeModels[0].classes
+                numCl = cl.size
+                treeProbs = np.zeros([X.shape[0], self.numTrees, numCl])
+                for i in range(self.numTrees):
+                        probs = self.treeModels[i].predict(X)
+                        treeProbs[:, i, :] = probs
+
+                treeProbs = np.reshape(treeProbs, (treeProbs.shape[0],
+                                       treeProbs.shape[1]*treeProbs.shape[2]))
+                # print treeProbs[0]              
+                self.logreg = linear_model.LogisticRegression()
+                self.logreg.fit(treeProbs, Y)
+                self.treeWeights = self.logreg.coef_
+                # print self.treeWeights.shape
+                return 
+                
+
         def predict(self,X):
                 """To test the forest model with the data provided as ndarray
 
@@ -347,15 +374,24 @@ class RandomForest:
                 cl = self.treeModels[0].classes
                 numCl = cl.size
                 overProb = np.zeros((X.shape[0],numCl))
-                for i in xrange(self.numTrees):
-                        probs = self.treeModels[i].predict(X)
-                        if i < self.numTrees / 2:
-                                overProb = overProb + 0.5 * probs
-                        else:
-                                overProb+= 1.5 * probs
+                # print self.treeWeights
+                # for i in xrange(self.numTrees):
+                #         probs = self.treeModels[i].predict(X)
+                #         # can introduce geometric weighting or learnt weighting as well
+                #         overProb[:, 0] = overProb[:, 0] + probs[:,0] * self.treeWeights[0, 2*i]
+                #         overProb[:, 1] = overProb[:, 1] + probs[:,1] * self.treeWeights[0, 2*i+1]
 
-                winningClass = np.argmax(overProb, axis=1)
-                return cl[winningClass]   
+                treeProbs = np.zeros([X.shape[0], self.numTrees, numCl])
+                for i in range(self.numTrees):
+                        probs = self.treeModels[i].predict(X)
+                        treeProbs[:, i, :] = probs
+
+                treeProbs = np.reshape(treeProbs, (treeProbs.shape[0],
+                                       treeProbs.shape[1]*treeProbs.shape[2]))
+                predictions = self.logreg.predict(treeProbs)
+                predictions = np.array(predictions, dtype=int)
+                # winningClass = np.argmax(overProb, axis=1)
+                return cl[predictions]   
 
         def clfname(self):
                 return "W_UCB_L"
